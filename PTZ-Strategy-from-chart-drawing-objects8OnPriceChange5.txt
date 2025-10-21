@@ -778,6 +778,10 @@ namespace NinjaTrader.NinjaScript.Strategies
 					double levelPrice = level.Key;
 					string description = level.Value.ToLower();
 
+					// DIAGNOSTIC: Print what we're checking
+					Print(string.Format("{0}: Checking BUY level {1:F2} - Description: '{2}' (UseGLLevels={3}, KeywordGL='{4}')",
+						Time[0], levelPrice, description, UseGLLevels, KeywordGL.ToLower()));
+
 					// Apply LBL filter if enabled
 					if (UseLBLFilter)
 					{
@@ -786,26 +790,49 @@ namespace NinjaTrader.NinjaScript.Strategies
 						// If RequireLBLInDescription is true, only trade levels WITH "LBL"
 						// If RequireLBLInDescription is false, only trade levels WITHOUT "LBL"
 						if (RequireLBLInDescription && !hasLBL)
+						{
+							Print(string.Format("  -> Skipped: LBL filter (requires LBL but not found)"));
 							continue;
+						}
 						if (!RequireLBLInDescription && hasLBL)
+						{
+							Print(string.Format("  -> Skipped: LBL filter (excludes LBL but found)"));
 							continue;
+						}
 					}
 
 					bool isBuyLevel = false;
 
 					// Standard keyword checks
 					if (UseSupport && description.Contains(KeywordSupport.ToLower()))
+					{
 						isBuyLevel = true;
+						Print(string.Format("  -> Matched Support keyword"));
+					}
 					if (UsePivotBull && description.Contains(KeywordPivotBull.ToLower()))
+					{
 						isBuyLevel = true;
+						Print(string.Format("  -> Matched Pivot Bull keyword"));
+					}
 					if (UseStrengthConfirmed && description.Contains(KeywordStrengthConfirmed.ToLower()))
+					{
 						isBuyLevel = true;
+						Print(string.Format("  -> Matched Strength Confirmed keyword"));
+					}
 
 					// GL levels: if GL is BELOW current price, treat as support
 					if (UseGLLevels && description.Contains(KeywordGL.ToLower()) && levelPrice < currentPrice)
 					{
 						isBuyLevel = true;
-						Print(string.Format("{0}: GL level at {1:F2} is BELOW price {2:F2} - treating as SUPPORT", Time[0], levelPrice, currentPrice));
+						Print(string.Format("  -> GL level at {1:F2} is BELOW price {2:F2} - treating as SUPPORT", Time[0], levelPrice, currentPrice));
+					}
+					else if (UseGLLevels && description.Contains(KeywordGL.ToLower()) && levelPrice >= currentPrice)
+					{
+						Print(string.Format("  -> GL level at {1:F2} is NOT below price {2:F2} - NOT a buy level", Time[0], levelPrice, currentPrice));
+					}
+					else if (UseGLLevels && !description.Contains(KeywordGL.ToLower()))
+					{
+						Print(string.Format("  -> GL enabled but description doesn't contain '{0}'", KeywordGL.ToLower()));
 					}
 
 					if (isBuyLevel)
@@ -873,6 +900,10 @@ namespace NinjaTrader.NinjaScript.Strategies
 					double levelPrice = level.Key;
 					string description = level.Value.ToLower();
 
+					// DIAGNOSTIC: Print what we're checking
+					Print(string.Format("{0}: Checking SELL level {1:F2} - Description: '{2}' (UseGLLevels={3}, KeywordGL='{4}')",
+						Time[0], levelPrice, description, UseGLLevels, KeywordGL.ToLower()));
+
 					// Apply LBL filter if enabled
 					if (UseLBLFilter)
 					{
@@ -881,26 +912,49 @@ namespace NinjaTrader.NinjaScript.Strategies
 						// If RequireLBLInDescription is true, only trade levels WITH "LBL"
 						// If RequireLBLInDescription is false, only trade levels WITHOUT "LBL"
 						if (RequireLBLInDescription && !hasLBL)
+						{
+							Print(string.Format("  -> Skipped: LBL filter (requires LBL but not found)"));
 							continue;
+						}
 						if (!RequireLBLInDescription && hasLBL)
+						{
+							Print(string.Format("  -> Skipped: LBL filter (excludes LBL but found)"));
 							continue;
+						}
 					}
 
 					bool isSellLevel = false;
 
 					// Standard keyword checks
 					if (UseResistance && description.Contains(KeywordResistance.ToLower()))
+					{
 						isSellLevel = true;
+						Print(string.Format("  -> Matched Resistance keyword"));
+					}
 					if (UsePivotBear && description.Contains(KeywordPivotBear.ToLower()))
+					{
 						isSellLevel = true;
+						Print(string.Format("  -> Matched Pivot Bear keyword"));
+					}
 					if (UseWeaknessConfirmed && description.Contains(KeywordWeaknessConfirmed.ToLower()))
+					{
 						isSellLevel = true;
+						Print(string.Format("  -> Matched Weakness Confirmed keyword"));
+					}
 
 					// GL levels: if GL is ABOVE current price, treat as resistance
 					if (UseGLLevels && description.Contains(KeywordGL.ToLower()) && levelPrice > currentPrice)
 					{
 						isSellLevel = true;
-						Print(string.Format("{0}: GL level at {1:F2} is ABOVE price {2:F2} - treating as RESISTANCE", Time[0], levelPrice, currentPrice));
+						Print(string.Format("  -> GL level at {1:F2} is ABOVE price {2:F2} - treating as RESISTANCE", Time[0], levelPrice, currentPrice));
+					}
+					else if (UseGLLevels && description.Contains(KeywordGL.ToLower()) && levelPrice <= currentPrice)
+					{
+						Print(string.Format("  -> GL level at {1:F2} is NOT above price {2:F2} - NOT a sell level", Time[0], levelPrice, currentPrice));
+					}
+					else if (UseGLLevels && !description.Contains(KeywordGL.ToLower()))
+					{
+						Print(string.Format("  -> GL enabled but description doesn't contain '{0}'", KeywordGL.ToLower()));
 					}
 
 					if (isSellLevel)
